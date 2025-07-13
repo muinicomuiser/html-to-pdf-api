@@ -7,6 +7,7 @@ import {
 import * as puppeteer from 'puppeteer';
 import { Logger } from '@nestjs/common';
 import { CreateFromHTMLTextDTO } from '../dto/create.fromHTMLText.dto';
+import { CreatePDFFormatOptions } from '../dto/create.pdfFormatOptions';
 
 @Injectable()
 export class PdfService implements OnModuleInit, OnApplicationShutdown {
@@ -26,14 +27,14 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
           '--disable-dev-shm-usage',
         ],
       });
-      this.pdfServiceLogger.log('Navegador Puppeteer inicializado.');
+      this.pdfServiceLogger.log('Navegador Puppeteer iniciado.');
     } catch (error) {
       this.pdfServiceLogger.error(
-        'Error al inicializar el navegador Puppeteer:',
+        'Error al iniciar el navegador Puppeteer:',
         error,
       );
       throw new InternalServerErrorException(
-        'Fallo al inicializar el servicio de PDF: Navegador no disponible.',
+        'Fallo al iniciar el servicio de PDF: Navegador no disponible.',
       );
     }
   }
@@ -48,10 +49,13 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
     }
   }
 
-  async convertHtmlToPdf(createFromHTMLTextDTO: CreateFromHTMLTextDTO): Promise<Uint8Array> {
+  /**Convierte un texto en formato HTML a un archivo PDF */
+  async convertHtmlTextToPdf(
+    createFromHTMLTextDTO: CreateFromHTMLTextDTO,
+  ): Promise<Uint8Array> {
     if (!this.browser) {
       throw new InternalServerErrorException(
-        'El servicio de PDF no está listo: Navegador no inicializado.',
+        'El servicio de PDF no está listo: Navegador no iniciado.',
       );
     }
 
@@ -77,5 +81,17 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
         await page.close();
       }
     }
+  }
+  /**Convierte un archivo en formato HTML a un archivo PDF */  
+  async convertHTMLFileToPdf(
+    file: Express.Multer.File,
+    createPDFFormatOptions: CreatePDFFormatOptions,
+  ) {
+    const bufferString = file.buffer.toString();
+    const textToPdfDTO: CreateFromHTMLTextDTO = new CreateFromHTMLTextDTO(
+      bufferString,
+      createPDFFormatOptions,
+    );
+    return this.convertHtmlTextToPdf(textToPdfDTO);
   }
 }
