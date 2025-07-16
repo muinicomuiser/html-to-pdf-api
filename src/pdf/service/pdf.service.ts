@@ -8,12 +8,16 @@ import * as puppeteer from 'puppeteer';
 import { Logger } from '@nestjs/common';
 import { CreateFromHTMLTextDTO } from '../dto/create.fromHTMLText.dto';
 import { CreatePDFFormatOptions } from '../dto/create.pdfFormatOptions';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PdfService implements OnModuleInit, OnApplicationShutdown {
   private browser: puppeteer.Browser;
 
-  constructor(private readonly pdfServiceLogger: Logger) {
+  constructor(
+    private readonly pdfServiceLogger: Logger,
+    private readonly configService: ConfigService,
+  ) {
     this.pdfServiceLogger = new Logger(PdfService.name);
   }
 
@@ -82,7 +86,7 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
       }
     }
   }
-  /**Convierte un archivo en formato HTML a un archivo PDF */  
+  /**Convierte un archivo en formato HTML a un archivo PDF */
   async convertHTMLFileToPdf(
     file: Express.Multer.File,
     createPDFFormatOptions: CreatePDFFormatOptions,

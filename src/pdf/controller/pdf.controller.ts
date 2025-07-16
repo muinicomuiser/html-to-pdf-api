@@ -1,16 +1,19 @@
 import {
   Body,
   Controller,
+  FileTypeValidator,
+  ParseFilePipe,
   Post,
   Res,
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
-import { Response } from 'express';
-import { PdfService } from '../service/pdf.service';
-import { CreateFromHTMLTextDTO } from '../dto/create.fromHTMLText.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { Response } from 'express';
+import { CreateFromHTMLTextDTO } from '../dto/create.fromHTMLText.dto';
 import { CreatePDFFormatOptions } from '../dto/create.pdfFormatOptions';
+import { MaxRequestFileSizeValidator } from '../pipe/maxRequestFileSizeValidator.pipe';
+import { PdfService } from '../service/pdf.service';
 
 @Controller('pdf')
 export class PdfController {
@@ -35,7 +38,18 @@ export class PdfController {
   @Post('htmlfile')
   @UseInterceptors(FileInterceptor('file'))
   async generatePDFFromHTMLFile(
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(
+      MaxRequestFileSizeValidator,
+      new ParseFilePipe({
+        validators: [
+          new FileTypeValidator({
+            fileType: 'text/html',
+            skipMagicNumbersValidation: true,
+          }),
+        ],
+      }),
+    )
+    file: Express.Multer.File,
     @Body() createPDFFormatOptions: CreatePDFFormatOptions,
     @Res() res: Response,
   ) {
