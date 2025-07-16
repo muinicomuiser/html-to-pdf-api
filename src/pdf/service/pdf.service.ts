@@ -1,22 +1,20 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   OnApplicationShutdown,
   OnModuleInit,
 } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import { Logger } from '@nestjs/common';
 import { CreateFromHTMLTextDTO } from '../dto/create.fromHTMLText.dto';
 import { CreatePDFFormatOptions } from '../dto/create.pdfFormatOptions';
-import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PdfService implements OnModuleInit, OnApplicationShutdown {
   private browser: puppeteer.Browser;
 
   constructor(
-    private readonly pdfServiceLogger: Logger,
-    private readonly configService: ConfigService,
+    private readonly pdfServiceLogger: Logger
   ) {
     this.pdfServiceLogger = new Logger(PdfService.name);
   }
@@ -71,10 +69,7 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
         waitUntil: 'networkidle0',
       });
 
-      const pdfBuffer = await page.pdf({
-        format: createFromHTMLTextDTO.format,
-        printBackground: createFromHTMLTextDTO.printBackground,
-      });
+      const pdfBuffer = await page.pdf(createFromHTMLTextDTO.createPDFFormatOptions);
 
       return pdfBuffer;
     } catch (error) {
