@@ -4,10 +4,10 @@ import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
-    PdfModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    PdfModule,
   ],
   controllers: [],
   providers: [],

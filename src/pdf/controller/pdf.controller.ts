@@ -4,21 +4,28 @@ import {
   FileTypeValidator,
   ParseFilePipe,
   Post,
+  Req,
   Res,
   UploadedFile,
   UseInterceptors,
+  UsePipes,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
-import { CreateFromHTMLTextDTO } from '../dto/create.fromHTMLText.dto';
-import { CreatePDFFormatOptions } from '../dto/create.pdfFormatOptions';
+import {
+  CreateFromHTMLTextDTO,
+  CreateFromHTMLTextSchema,
+} from '../dto/create.fromHTMLText.schema';
+import { CreatePDFFormatOptions } from '../dto/create.pdfFormatOptions.schema';
 import { MaxRequestFileSizeValidator } from '../pipe/maxRequestFileSizeValidator.pipe';
 import { PdfService } from '../service/pdf.service';
+import { ZodValidationPipe } from '../pipe/createFromHTMLTextValidation.pipe';
 
 @Controller('pdf')
 export class PdfController {
   constructor(private readonly pdfService: PdfService) {}
 
+  @UsePipes(new ZodValidationPipe(CreateFromHTMLTextSchema))
   @Post('htmltext')
   async generatePDFFromHTMLText(
     @Body() createFromHTMLTextDTO: CreateFromHTMLTextDTO,

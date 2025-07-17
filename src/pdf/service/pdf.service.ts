@@ -6,16 +6,14 @@ import {
   OnModuleInit,
 } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
-import { CreateFromHTMLTextDTO } from '../dto/create.fromHTMLText.dto';
-import { CreatePDFFormatOptions } from '../dto/create.pdfFormatOptions';
+import { CreateFromHTMLTextDTO } from '../dto/create.fromHTMLText.schema';
+import { CreatePDFFormatOptions } from '../dto/create.pdfFormatOptions.schema';
 
 @Injectable()
 export class PdfService implements OnModuleInit, OnApplicationShutdown {
   private browser: puppeteer.Browser;
 
-  constructor(
-    private readonly pdfServiceLogger: Logger
-  ) {
+  constructor(private readonly pdfServiceLogger: Logger) {
     this.pdfServiceLogger = new Logger(PdfService.name);
   }
 
@@ -69,7 +67,9 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
         waitUntil: 'networkidle0',
       });
 
-      const pdfBuffer = await page.pdf(createFromHTMLTextDTO.createPDFFormatOptions);
+      const pdfBuffer = await page.pdf(
+        createFromHTMLTextDTO.createPDFFormatOptions as puppeteer.PDFOptions,
+      );
 
       return pdfBuffer;
     } catch (error) {
@@ -87,10 +87,10 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
     createPDFFormatOptions: CreatePDFFormatOptions,
   ) {
     const bufferString = file.buffer.toString();
-    const textToPdfDTO: CreateFromHTMLTextDTO = new CreateFromHTMLTextDTO(
-      bufferString,
-      createPDFFormatOptions,
-    );
+    const textToPdfDTO: CreateFromHTMLTextDTO = {
+      htmlContent: bufferString,
+      createPDFFormatOptions: createPDFFormatOptions,
+    };
     return this.convertHtmlTextToPdf(textToPdfDTO);
   }
 }
