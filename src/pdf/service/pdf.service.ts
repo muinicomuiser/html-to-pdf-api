@@ -40,12 +40,22 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
   }
 
   async onApplicationShutdown(signal?: string) {
-    if (this.browser) {
-      this.pdfServiceLogger.log(
-        `La aplicación se está deteniendo. Señal recibida: ${signal}`,
+    try {
+      if (this.browser) {
+        this.pdfServiceLogger.log(
+          `La aplicación se está deteniendo. Señal recibida: ${signal}`,
+        );
+        await this.browser.close();
+        this.pdfServiceLogger.log('Navegador Puppeteer cerrado.');
+      }
+    } catch (error) {
+      this.pdfServiceLogger.error(
+        'Error al cerrar el navegador Puppeteer',
+        error,
       );
-      await this.browser.close();
-      this.pdfServiceLogger.log('Navegador Puppeteer cerrado.');
+      throw new InternalServerErrorException(
+        'Fallo al cerrar el navegador Puppeteer.',
+      );
     }
   }
 
@@ -54,11 +64,11 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
     createFromHTMLTextDTO: CreateFromHTMLTextDTO,
   ): Promise<Uint8Array> {
     if (!this.browser) {
+      this.pdfServiceLogger.error('Navegador no iniciado.');
       throw new InternalServerErrorException(
         'El servicio de PDF no está listo: Navegador no iniciado.',
       );
     }
-
     let page: puppeteer.Page | null = null;
     try {
       page = await this.browser.newPage();
@@ -86,11 +96,16 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
     file: Express.Multer.File,
     createPDFFormatOptions: CreatePDFFormatOptions,
   ) {
-    const bufferString = file.buffer.toString();
-    const textToPdfDTO: CreateFromHTMLTextDTO = {
-      htmlContent: bufferString,
-      createPDFFormatOptions: createPDFFormatOptions,
-    };
-    return this.convertHtmlTextToPdf(textToPdfDTO);
+    try {
+      const bufferString = file.buffer.toString();
+      const textToPdfDTO: CreateFromHTMLTextDTO = {
+        htmlContent: bufferString,
+        createPDFFormatOptions: createPDFFormatOptions,
+      };
+      return await this.convertHtmlTextToPdf(textToPdfDTO);
+    } catch (error) {
+      this.pdfServiceLogger.error('Error al convertir Archivo a PDF:', error);
+      throw new InternalServerErrorException('Error al generar el PDF.');
+    }
   }
 }

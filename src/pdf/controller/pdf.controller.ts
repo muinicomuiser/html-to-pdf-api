@@ -4,7 +4,6 @@ import {
   FileTypeValidator,
   ParseFilePipe,
   Post,
-  Req,
   Res,
   UploadedFile,
   UseInterceptors,
@@ -17,9 +16,9 @@ import {
   CreateFromHTMLTextSchema,
 } from '../dto/create.fromHTMLText.schema';
 import { CreatePDFFormatOptions } from '../dto/create.pdfFormatOptions.schema';
+import { ZodValidationPipe } from '../pipe/createFromHTMLTextValidation.pipe';
 import { MaxRequestFileSizeValidator } from '../pipe/maxRequestFileSizeValidator.pipe';
 import { PdfService } from '../service/pdf.service';
-import { ZodValidationPipe } from '../pipe/createFromHTMLTextValidation.pipe';
 
 @Controller('pdf')
 export class PdfController {
@@ -31,15 +30,19 @@ export class PdfController {
     @Body() createFromHTMLTextDTO: CreateFromHTMLTextDTO,
     @Res() res: Response,
   ) {
-    const pdfBuffer = await this.pdfService.convertHtmlTextToPdf(
-      createFromHTMLTextDTO,
-    );
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename="documento.pdf"',
-      'Content-Length': pdfBuffer.length,
-    });
-    res.send(pdfBuffer);
+    try {
+      const pdfBuffer = await this.pdfService.convertHtmlTextToPdf(
+        createFromHTMLTextDTO,
+      );
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename="documento.pdf"',
+        'Content-Length': pdfBuffer.length,
+      });
+      res.send(pdfBuffer);
+    } catch (error) {
+      throw error;
+    }
   }
 
   @Post('htmlfile')
@@ -60,15 +63,19 @@ export class PdfController {
     @Body() createPDFFormatOptions: CreatePDFFormatOptions,
     @Res() res: Response,
   ) {
-    const pdfBuffer = await this.pdfService.convertHTMLFileToPdf(
-      file,
-      createPDFFormatOptions,
-    );
-    res.set({
-      'Content-Type': 'application/pdf',
-      'Content-Disposition': 'attachment; filename="documento.pdf"',
-      'Content-Length': pdfBuffer.length,
-    });
-    res.send(pdfBuffer);
+    try {
+      const pdfBuffer = await this.pdfService.convertHTMLFileToPdf(
+        file,
+        createPDFFormatOptions,
+      );
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename="documento.pdf"',
+        'Content-Length': pdfBuffer.length,
+      });
+      res.send(pdfBuffer);
+    } catch (error) {
+      throw error;
+    }
   }
 }
