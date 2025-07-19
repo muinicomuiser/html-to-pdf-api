@@ -1,4 +1,4 @@
-FROM node:22
+FROM node:24-slim
 
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
@@ -11,21 +11,10 @@ RUN apt-get update && apt-get install curl gnupg -y \
   && apt-get install google-chrome-stable -y --no-install-recommends \
   && rm -rf /var/lib/apt/lists/*
 
-# Set the working directory inside the container
+ADD prod /usr/src/app
+
 WORKDIR /usr/src/app
 
-# Copy package.json and yarn-lock.json to the working directory
-COPY package.json ./
-COPY yarn.lock ./
-
-# Install the application dependencies
 RUN yarn install --production
 
-# Copy the rest of the application files
-COPY dist ./dist
-
-# Expose the application port
-EXPOSE 3000
-
-# Command to run the application
 CMD ["node", "dist/main"]
