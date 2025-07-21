@@ -1,0 +1,55 @@
+createPDFFormatOptions: {
+  
+  /**
+   * Scales the rendering of the web page. Amount must be between `0.1` and `2`.
+   * Default value:: `1`
+   */
+  scale?: number,
+
+  /**
+   * Set to `true` to print background graphics.
+   * Default value: `false`
+   */
+  printBackground?: boolean,
+
+  /**
+   * Whether to print in landscape orientation.
+   * Default value: `false`
+   * (Check if it's working)
+   */
+  landscape?: boolean,
+
+  /**
+   * If set, this takes priority over the `width` and `height` options.
+   * Options: 'letter', 'legal', 'tabloid', 'ledger', 'a0', 'a1', 'a2', 'a3', 'a4', 'a5', 'a6'
+   * Default value: `letter`.
+   */
+  format?: string,
+
+  /**
+   * Sets the width of paper. You can pass in a number or a string with a unit.
+   */
+  width?: string | number,
+  
+  /**
+   * Sets the height of paper. You can pass in a number or a string with a unit.
+   */
+  height?: string | number,
+  
+  /**
+   * Set the PDF margins.
+   * Default value: `undefined` no margins are set.
+   */
+  margin?: {
+    top?: string | number,
+    bottom?: string | number,
+    left?: string | number,
+    right?: string | number
+  },
+  
+  /**
+   * Hides default white background and allows generating pdfs with transparency.
+   * Default value: `false`
+   */
+  omitBackground?: boolean
+}

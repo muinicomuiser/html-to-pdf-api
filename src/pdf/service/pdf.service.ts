@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -83,8 +84,22 @@ export class PdfService implements OnModuleInit, OnApplicationShutdown {
 
       return pdfBuffer;
     } catch (error) {
-      this.pdfServiceLogger.error('Error al convertir HTML a PDF:', error);
-      throw new InternalServerErrorException('Error al generar el PDF.');
+      this.pdfServiceLogger.error(
+        'Error al convertir HTML a PDF',
+        error.message,
+      );
+      this.pdfServiceLogger.error(error);
+      if (error instanceof puppeteer.ProtocolError) {
+        throw new BadRequestException(
+          'Error al generar el PDF:',
+          (error as puppeteer.ProtocolError).originalMessage,
+        );
+      } else {
+        throw new InternalServerErrorException(
+          'Error al generar el PDF.',
+          error.message,
+        );
+      }
     } finally {
       if (page) {
         await page.close();
